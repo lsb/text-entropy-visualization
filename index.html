@@ -3,144 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <script src="d3.v2.js"></script>
+<script src="text-entropy.js"></script>
 <script>
-"use strict";
-
-var testSentence = "The fundamental problem of communication is that of reproducing at one point either exactly or approximately a message selected at another point. Frequently, the messages have meaning; that is, they refer to, or are correlated according to, some system with certain physical or conceptual entities. These semantic aspects of communication are irrelevant to the engineering problem. The significant aspect is that the actual message is one selected from a set of possible messages."
-
-var smallerTestSentence = "One small step for man; one giant leap for mankind."
-
-
-var wordToId = {};
-var idToWord = [];
-var loadWords = function(words) {
-  idToWord = words;
-  idToWord.forEach(function(word,id) { wordToId[word] = id });
-};
-
-var fyShuffle = function(array) {
-  var i = array.length;
-  while(--i) {
-    var j = Math.floor(Math.random()*i);
-    var tmp;
-    tmp = array[i];
-    array[i] = array[j];
-    array[j] = tmp;
-  }
-  return array;
-};
-
-var tokenize = function(string) { return string.replace(/,/g,'').split(/(?=[-.;:'!@#$^*()%^&+=\]\[?"](?:\s+|$))|\s+/) };
-
-var wordsPerLine = 6;
-
-var sentenceToProbabilityHashesK = function(string, order, callback) {
-  var wordIds = tokenize(string).map(function(word) { return wordToId[word] || 0 })
-  d3.json("http://vivam.us/ngrams/stats?order=" + order + "&ids=" + wordIds.join(','), callback);
-};
-
-var xhrLoadWords = function(isSmall,k) { d3.json("http://vivam.us/ngrams/" + (isSmall ? "idToWord-small.json" : "idToWord.json"), k) };
-
-var renderSentence = function(sentence, order, eachWidth, eachHeight, wrapper) {
-  if(!wrapper) { wrapper = d3.select("#wrapper"); }
-  wrapper.selectAll("*").remove();
-  sentenceToProbabilityHashesK(sentence, order, function(probabilityHashes) {
-    renderProbabilityHashesInWrapper(wrapper, probabilityHashes, eachWidth, eachHeight);
-  });
-};
-
 window.onload = function() {
-  xhrLoadWords(true, function(words) {
-    loadWords(words);
-    xhrLoadWords(false, loadWords);
-    wordsPerLine = 12;
-    eachk([5,4,3], function(order,i,k) {
-      renderSentence(smallerTestSentence, order, 100, 100, d3.select("#shannon" + order));
-      setTimeout(k,0);
-    }, function() {});
-  });
-  document.getElementById("sentence").value = testSentence;
-  document.getElementById("render").onsubmit = function() {
-    wordsPerLine = 6;
-    renderSentence(document.getElementById("sentence").value, document.getElementById("order").value, 200, 200, d3.select("#wrapper"));
-    return false;
-  };
+    "use strict";
+    var word_id_mapping = TextEntropy.word_id_mapping;
+    var xhrFetchK = word_id_mapping.xhrFetchK;
+    var loadWords = word_id_mapping.loadWords;
+    var longLine = 12;
+    var shortLine = 6;
+    var smallX = 100;
+    var smallY = 100;
+    var largeX = 200;
+    var largeY = 200;
+    var orders = [5,4,3];
+
+    xhrFetchK(true, function(words) {
+	    loadWords(words);
+	    xhrFetchK(false, loadWords);
+	    TextEntropy.utils.eachk(orders, function(order,i,k) {
+		    TextEntropy.dataVisualizations.renderSentence(TextEntropy.utils.smallerTestSentence, order, smallX, smallY, longLine, d3.select("#shannon" + order));
+		    setTimeout(k,0); // so that we show progress as each renders
+		}, function() {});
+	});
+    document.getElementById("sentence").value = TextEntropy.utils.testSentence;
+    document.getElementById("render").onsubmit = function() {
+	TextEntropy.dataVisualizations.renderSentence(document.getElementById("sentence").value, document.getElementById("order").value, largeX, largeY, shortLine, d3.select("#wrapper"));
+	return false;
+    };
 };
-
-var eachk = function(list, fk, k) { eachk_iter(list, fk, 0, k) };
-var eachk_iter = function(list, fk, i, k) {
-  list.length == 0 ? k() : fk(list[0], i, function() { eachk_iter(list.slice(1), fk, i+1, k); });
-}
-
-var renderProbabilityHashesInWrapper = function(wrapper, probabilityHashes, width, height) {
-  console.log("total bits: ", d3.sum(d3.merge(probabilityHashes).filter(function(probabilityHash) { return probabilityHash.continues }), function(probabilityHash) { return probabilityHash.value == 0 ? Math.log(500000) : (Math.log(probabilityHash.value) / (0 - Math.log(2))) }));
-  var renderKey = function(id) { return idToWord[id] || "no data"; };
-  wrapper.attr("width", width * wordsPerLine).attr("height", (height) * Math.ceil(probabilityHashes.length/wordsPerLine));
-  eachk(probabilityHashes, function(oneWordProbHashes,i,k) {
-    var continuingWord = oneWordProbHashes.filter(function(hash) { return hash.continues })[0].word;
-    var stackedArea = makeStackedAreaWithTooltip(wrapper, convertProbabilityHashesToStackedAreaData(oneWordProbHashes), 0.3, 1.0, width, height, renderKey)
-    stackedArea.attr("x", (i % wordsPerLine) * width).attr("y", Math.floor(i/wordsPerLine) * (height));
-    stackedArea.append("text").attr("class", "passage-word").text(renderKey(continuingWord)).attr("x","95%").attr("y","50%");
-    setTimeout(k,0);
-  }, function(){});
-};
-
-var convertProbabilityHashesToStackedAreaData = function(oneWordProbHashes) {
-  return oneWordProbHashes.map(function(h) {
-    var next = h.continues ? 1 : 0;
-    return [{key: h.word, value: h.value, date: 0},
-            {key: h.word, value: h.value, date: 8},
-            {key: h.word, value: next, date: 9},
-            {key: h.word, value: next, date: 10}];
-  });
-};
-
-var makeStackedAreaWithTooltip = function(d3Selection, data, activeOpacity, inactiveOpacity, width, height, keyToTooltipText) {
-  // kudos to bl.ocks.org/3020685
-
-  var x = d3.time.scale().range([0, width]);
-  var y = d3.scale.linear().range([height, 0]);
-  var colors = d3.scale.category10().range();
-  var r = Math.floor(10 * Math.random());
-  var shiftedColors = colors.slice(r).concat(colors.slice(0,r));
-  var z = d3.scale.ordinal().range(shiftedColors);
-  var stack = d3.layout.stack()
-      .offset("zero")
-      .x(function(d) { return d.date; })
-      .y(function(d) { return d.value; });
-
-  var area = d3.svg.area()
-      .interpolate("basis")
-      .x(function(d) { return x(d.date); })
-      .y0(function(d) { return y(d.y0); })
-      .y1(function(d) { return y(d.y0 + d.y); });
-
-  var getOpacity = function(values) { return values[values.length - 1].value == 1 ? activeOpacity : inactiveOpacity };
-
-  var svg = d3Selection.append("svg").attr("width", width).attr("height", height);
-
-  var tooltip;
-
-  var layers = stack(data);
-
-  x.domain(d3.extent(data[0], function(d) { return d.date; }));
-  y.domain([0, d3.max(d3.transpose(data), function(date_key_values) { return d3.sum(date_key_values, function(date_key_value) { return date_key_value.value }) })]);
-
-  svg.selectAll(".layer")
-      .data(layers)
-    .enter().append("path")
-      .attr("class", "layer")
-      .attr("d", area)
-      .style("opacity", getOpacity)
-      .on("mouseover", function(d) { tooltip.style("visibility", "visible"); tooltip.text(keyToTooltipText(d[0].key)); })
-      .on("mousemove", function() { var mouseCoords = d3.svg.mouse(this); tooltip.attr("x", mouseCoords[0] + 15); tooltip.attr("y", mouseCoords[1] + 15); })
-      .on("mouseout", function() { tooltip.style("visibility", "hidden"); })
-      .style("fill", function(d, i) { return z(i); });
-
-  tooltip = svg.append("text").attr("class","helptext");
-
-  return svg;
-}
 </script>
 <style>
 body {
