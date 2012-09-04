@@ -4,7 +4,6 @@ TextEntropy.utils = (function() {
     "use strict";
     var testSentence = "The fundamental problem of communication is that of reproducing at one point either exactly or approximately a message selected at another point. Frequently, the messages have meaning; that is, they refer to, or are correlated according to, some system with certain physical or conceptual entities. These semantic aspects of communication are irrelevant to the engineering problem. The significant aspect is that the actual message is one selected from a set of possible messages.";
     var smallerTestSentence = "One small step for man; one giant leap for mankind.";
-    var nearest = function(n,pow) { return Math.round(n*Math.pow(10,pow))/Math.pow(10,pow);};
     var tokenize = function(string) { return string.replace(/,/g,'').split(/(?=[-.;:\'!@#$^*()%^&+=\]\[?\"<>](?:\s+|$))|\s+/) };
     var eachk_iter = function(list, fk, i, k) {
 	list.length == 0 ? k() : fk(list[0], i, function() { eachk_iter(list.slice(1), fk, i+1, k); });
@@ -21,7 +20,7 @@ TextEntropy.utils = (function() {
 	    });
     };
 
-    return { testSentence: testSentence, smallerTestSentence: smallerTestSentence, tokenize: tokenize, eachk: eachk, convertProbabilityHashesToStackedAreaData: convertProbabilityHashesToStackedAreaData, nearest: nearest};
+    return { testSentence: testSentence, smallerTestSentence: smallerTestSentence, tokenize: tokenize, eachk: eachk, convertProbabilityHashesToStackedAreaData: convertProbabilityHashesToStackedAreaData};
 })();
 
 
@@ -105,7 +104,7 @@ TextEntropy.d3Visualizations = {
 		return "no data";
 	    if(prob == null)
 		return word;
-	    return word + ' (' + TextEntropy.utils.nearest(100*prob,4) + '%)';
+	    return word + ' (' + Math.round(100*prob) + '%)';
 	};
 	wrapper.attr("width", width * wordsPerLine).attr("height", (height) * Math.ceil(probabilityHashes.length/wordsPerLine));
 	TextEntropy.utils.eachk(probabilityHashes, function(oneWordProbHashes,i,k) {
