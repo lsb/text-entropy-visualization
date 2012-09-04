@@ -15,6 +15,7 @@ TextEntropy.utils = (function() {
 	}
 	return array;
     };
+    var nearest = function(n,pow) { return Math.round(n*Math.pow(10,pow))/Math.pow(10,pow);};
     var tokenize = function(string) { return string.replace(/,/g,'').split(/(?=[-.;:\'!@#$^*()%^&+=\]\[?\"<>](?:\s+|$))|\s+/) };
     var eachk_iter = function(list, fk, i, k) {
 	list.length == 0 ? k() : fk(list[0], i, function() { eachk_iter(list.slice(1), fk, i+1, k); });
@@ -31,12 +32,12 @@ TextEntropy.utils = (function() {
 	    });
     };
 
-    return { testSentence: testSentence, smallerTestSentence: smallerTestSentence, fyShuffle: fyShuffle, tokenize: tokenize, eachk: eachk, convertProbabilityHashesToStackedAreaData: convertProbabilityHashesToStackedAreaData};
+    return { testSentence: testSentence, smallerTestSentence: smallerTestSentence, fyShuffle: fyShuffle, tokenize: tokenize, eachk: eachk, convertProbabilityHashesToStackedAreaData: convertProbabilityHashesToStackedAreaData, nearest: nearest};
 })();
 
 
 TextEntropy.d3utils = {
-    makeStackedAreaWithTooltip: function(d3Selection, data, activeOpacity, inactiveOpacity, width, height, keyToTooltipText) { // kudos to bl.ocks.org/3020685
+    makeStackedAreaWithTooltip: function(d3Selection, data, activeOpacity, inactiveOpacity, width, height, keyToTooltipText, tooltip) { // kudos to bl.ocks.org/3020685
 	"use strict";
 
 	var x = d3.time.scale().range([0, width]);
@@ -59,8 +60,6 @@ TextEntropy.d3utils = {
 
 	var svg = d3Selection.append("svg").attr("width", width).attr("height", height);
 
-	var tooltip;
-
 	var layers = stack(data);
 
 	x.domain(d3.extent(data[0], function(d) { return d.date; }));
@@ -72,12 +71,10 @@ TextEntropy.d3utils = {
              .attr("class", "layer")
              .attr("d", area)
              .style("opacity", getOpacity)
-              .on("mouseover", function(d) { tooltip.style("visibility", "visible"); tooltip.text(keyToTooltipText(d[0].key)); })
-              .on("mousemove", function() { var mouseCoords = d3.svg.mouse(this); tooltip.attr("x", mouseCoords[0] + 15); tooltip.attr("y", mouseCoords[1] + 15); })
+              .on("mouseover", function(d) { tooltip.style("visibility", "visible"); tooltip.text(keyToTooltipText(d[0].key, d[0].value)); })
+              .on("mousemove", function() { var mouseCoords = d3.mouse(document.body); tooltip.style("left", (mouseCoords[0] + 15) + "px" ); tooltip.style("top", (mouseCoords[1] + 15) + "px"); })
               .on("mouseout", function() { tooltip.style("visibility", "hidden"); })
               .style("fill", function(d, i) { return z(i); });
-
-	tooltip = svg.append("text").attr("class","helptext");
 
 	return svg;
     }
@@ -111,13 +108,21 @@ TextEntropy.ngramDataIO = (function() {
 
 TextEntropy.d3Visualizations = {
     renderProbabilityHashesInWrapper: function(wrapper, probabilityHashes, width, height, wordsPerLine) {
-	console.log("total bits: ", d3.sum(d3.merge(probabilityHashes).filter(function(probabilityHash) { return probabilityHash.continues }), function(probabilityHash) { return probabilityHash.value == 0 ? Math.log(500000) : (Math.log(probabilityHash.value) / (0 - Math.log(2))) }));
+	if(console) console.log("total bits: ", d3.sum(d3.merge(probabilityHashes).filter(function(probabilityHash) { return probabilityHash.continues }), function(probabilityHash) { return probabilityHash.value == 0 ? Math.log(500000) : (Math.log(probabilityHash.value) / (0 - Math.log(2))) }));
 
-	var renderKey = function(id) { return TextEntropy.word_id_mapping.byId(id) || "no data"; };
+	var renderKey = function(id, prob) {
+	    var word = TextEntropy.word_id_mapping.byId(id);
+	    if(word == null)
+		return "no data";
+	    if(prob == null)
+		return word;
+	    return word + ' (' + TextEntropy.utils.nearest(100*prob,4) + '%)';
+	};
 	wrapper.attr("width", width * wordsPerLine).attr("height", (height) * Math.ceil(probabilityHashes.length/wordsPerLine));
 	TextEntropy.utils.eachk(probabilityHashes, function(oneWordProbHashes,i,k) {
 	    var continuingWord = oneWordProbHashes.filter(function(hash) { return hash.continues })[0].word;
-	    var stackedArea = TextEntropy.d3utils.makeStackedAreaWithTooltip(wrapper, TextEntropy.utils.convertProbabilityHashesToStackedAreaData(oneWordProbHashes), 0.3, 1.0, width, height, renderKey);
+	    var tooltip = d3.select("#tooltip");
+	    var stackedArea = TextEntropy.d3utils.makeStackedAreaWithTooltip(wrapper, TextEntropy.utils.convertProbabilityHashesToStackedAreaData(oneWordProbHashes), 0.3, 1.0, width, height, renderKey, tooltip);
 	    stackedArea.attr("x", (i % wordsPerLine) * width).attr("y", Math.floor(i/wordsPerLine) * (height));
 	    stackedArea.append("text").attr("class", "passage-word").text(renderKey(continuingWord)).attr("x","95%").attr("y","50%");
 	    setTimeout(k,0);

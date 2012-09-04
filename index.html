@@ -38,6 +38,7 @@ body {
   font: 12pt Georgia;
   width: 10in;
   margin: auto;
+  position: relative;
 }
 .axis path, .axis line {
   fill: none;
@@ -47,7 +48,7 @@ body {
 path.layer:hover {
   fill: white !important;
 }
-text.helptext {
+div.helptext {
   fill: black;
   text-shadow: 2px 2px 4px white;
   font-size: 14pt;
@@ -92,6 +93,7 @@ form {
 
 <p>Note how the 5-gram visualization is a much more faded image than the 4-gram visualization, which implies that the 5-gram model is a better predictor than the 4-gram model, and similarly the 4-gram model is more predictive than the 3-gram model.</p>
 
+<div style="position: absolute" class="helptext" id="tooltip"></div>
 <div id="armstrong-triptych">
   <figure id="armstrong5wrapper">
     <figcaption>5</figcaption>
