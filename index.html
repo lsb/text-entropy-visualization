@@ -12,7 +12,7 @@ window.onload = function() {
     var loadWords = word_id_mapping.loadWords;
     var longLine = 12;
     var shortLine = 6;
-    var smallX = 70;
+    var smallX = 75;
     var smallY = 80;
     var largeX = 160;
     var largeY = 160;
@@ -70,18 +70,22 @@ text.passage-word {
 #tooltip {
   position: absolute;
 }
+
+form {
+  margin-bottom: 1em;
+}
 </style>
 </head>
 <body>
 <h1>Interactive Text Entropy Visualization</h1>
 
-<p>How much information do you get from a message? That depends on your model of what you're reading. If it's in English, you can even skip the last word in a sentence but still grasp the gist of __. If it's in a foreign language, you might get a lot more information about content, grammar, orthography, alphabet.</p>
+<h3>This is an <a href="#demo">interactive</a> <a href="#code">open-source</a> visualization of the entropy of arbitrary text,<br>based on word-based Markov models of modern printed English.</h3>
 
-<p>It would be interesting to take a few language models of modern English, and to use them to visualize the total information conveyed by an arbitrary message.</p>
+<p>The amount of information that you get from a message depends on your model of what you&rsquo;re reading.<br>If it&rsquo;s in your native language, you can even skip the last word in a sentence but still grasp the gist of __.</p>
 
-<p>I decided to use five word-based Markov models of modern format English, zeroth-order to fourth-order, from printed text from 1800-2008, via the Google Books n-gram dataset. Each word in a passage is represented by a stack of colored bars, stacked in a square block; each bar represents a word in context that the model predicted; the vertical percentage of each bar starts as its probability predicted by the model, and the percentage tweens to either 0% or 100% depending on whether that word was the actual word in context. The color of the actual word is faded, whereas the colors of all the other words are vivid: <em>a vivid image represents a more information-rich, less predictable message</em>.</p>
+<p>I made five word-based Markov models of modern formal English, zeroth-order to fourth-order, from printed text from 1800-2008, via the Google Books n-gram dataset. The visualization represents each word position as a stack of colored bars, stacked in a square block. Each bar in the stack represents a word in context that the model predicted; the vertical percentage of each bar starts as its probability predicted by the model, and the percentage tweens to either 0% or 100% depending on whether that word was the actual word in context. The color of the actual word is faded, whereas the colors of all the other words are vivid: <em>a vivid image represents a more information-rich, less predictable message</em>.</p>
 
-<p>Note how the 5-gram model predicts each word better, and thus makes a much more faded image, than a 4-gram model, and similarly the 4-gram model is more predictive than the 3-gram model.</p>
+<p>Note how the 5-gram visualization is a much more faded image than the 4-gram visualization, which implies that the 5-gram model is a better predictor than the 4-gram model, and similarly the 4-gram model is more predictive than the 3-gram model.</p>
 
 <div id="armstrong-triptych">
   <div id="armstrong5wrapper">
@@ -98,6 +102,7 @@ text.passage-word {
   </div>
 </div>
 
+<a name="demo"></a>
 <p>Try it out yourself!</p>
 
 <form id="render">
@@ -117,6 +122,9 @@ text.passage-word {
 
 <div id="tooltip"></div>
 
-<p>&copy; 2012 <a href="http://www.leebutterman.com">Lee Butterman</a>. Code available on GitHub for <a href="http://github.com/lsb/text-entropy">creating the statistical model</a>, <a href="https://github.com/lsb/text-entropy-api">the web service to pull stats on words</a>, and <a href="https://github.com/lsb/text-entropy-visualization">this data visualization</a>.
+<a name="code"></a>
+<p>Code available on GitHub for <a href="http://github.com/lsb/text-entropy">creating the statistical model</a>, <a href="https://github.com/lsb/text-entropy-api">the web service to pull stats on words</a>, and <a href="https://github.com/lsb/text-entropy-visualization">this data visualization</a>.</p>
+
+<p>&copy; 2012 <a href="http://www.leebutterman.com">Lee Butterman</a>.</p>
 </body>
 </html>
