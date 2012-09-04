@@ -52,8 +52,13 @@ text.helptext {
   text-shadow: 2px 2px 4px white;
   font-size: 14pt;
 }
-#armstrong-triptych div {
+#armstrong-triptych figure {
+  margin: 0;
+  display: block;
+}
+#armstrong-triptych figure figcaption {
   vertical-align: top;
+  display: inline;
 }
 #armstrong-triptych svg {
   margin-bottom: 2em;
@@ -88,18 +93,18 @@ form {
 <p>Note how the 5-gram visualization is a much more faded image than the 4-gram visualization, which implies that the 5-gram model is a better predictor than the 4-gram model, and similarly the 4-gram model is more predictive than the 3-gram model.</p>
 
 <div id="armstrong-triptych">
-  <div id="armstrong5wrapper">
-    5
+  <figure id="armstrong5wrapper">
+    <figcaption>5</figcaption>
     <svg id="armstrong5" xmlns="http://www.w3.org/2000/svg"></svg>
-  </div>
-  <div id="armstrong4wrapper">
-    4
+  </figure>
+  <figure id="armstrong4wrapper">
+    <figcaption>4</figcaption>
     <svg id="armstrong4" xmlns="http://www.w3.org/2000/svg"></svg>
-  </div>
-  <div id="armstrong3wrapper">
-    3
+  </figure>
+  <figure id="armstrong3wrapper">
+    <figcaption>3</figcaption>
     <svg id="armstrong3" xmlns="http://www.w3.org/2000/svg"></svg>
-  </div>
+  </figure>
 </div>
 
 <a name="demo"></a>
