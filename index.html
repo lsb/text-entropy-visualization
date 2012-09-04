@@ -12,7 +12,7 @@ window.onload = function() {
     var loadWords = word_id_mapping.loadWords;
     var longLine = 12;
     var shortLine = 6;
-    var smallX = 80;
+    var smallX = 70;
     var smallY = 80;
     var largeX = 160;
     var largeY = 160;
@@ -52,8 +52,11 @@ text.helptext {
   text-shadow: 2px 2px 4px white;
   font-size: 14pt;
 }
+#armstrong-triptych div {
+  vertical-align: top;
+}
 #armstrong-triptych svg {
-  margin: 0.1in;
+  margin-bottom: 2em;
 }
 text.passage-word {
   text-anchor: end;
@@ -76,14 +79,23 @@ text.passage-word {
 
 <p>It would be interesting to take a few language models of modern English, and to use them to visualize the total information conveyed by an arbitrary message.</p>
 
-<p>I decided to use five word-based Markov models of modern format English, zeroth-order to fourth-order, from printed text from 1800-2008, via the Google Books n-gram dataset. Each word in a passage is represented by a stack of colored bars, stacked in a square block; each bar represents a word in context that the model predicted; the vertical percentage of each bar starts as its probability predicted by the model, and the percentage tweens to either 0% or 100% depending on whether that word was the actual word in context. The color of the actual word is faded, whereas the colors of all the other words are vivid: a vivid image represent a more information-rich, less predictable message.</p>
+<p>I decided to use five word-based Markov models of modern format English, zeroth-order to fourth-order, from printed text from 1800-2008, via the Google Books n-gram dataset. Each word in a passage is represented by a stack of colored bars, stacked in a square block; each bar represents a word in context that the model predicted; the vertical percentage of each bar starts as its probability predicted by the model, and the percentage tweens to either 0% or 100% depending on whether that word was the actual word in context. The color of the actual word is faded, whereas the colors of all the other words are vivid: <em>a vivid image represents a more information-rich, less predictable message</em>.</p>
 
 <p>Note how the 5-gram model predicts each word better, and thus makes a much more faded image, than a 4-gram model, and similarly the 4-gram model is more predictive than the 3-gram model.</p>
 
 <div id="armstrong-triptych">
-  <svg id="armstrong5" xmlns="http://www.w3.org/2000/svg"></svg>
-  <svg id="armstrong4" xmlns="http://www.w3.org/2000/svg"></svg>
-  <svg id="armstrong3" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div id="armstrong5wrapper">
+    5
+    <svg id="armstrong5" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+  <div id="armstrong4wrapper">
+    4
+    <svg id="armstrong4" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+  <div id="armstrong3wrapper">
+    3
+    <svg id="armstrong3" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
 </div>
 
 <p>Try it out yourself!</p>
