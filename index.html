@@ -22,7 +22,7 @@ window.onload = function() {
 	    loadWords(words);
 	    xhrFetchK(false, loadWords);
 	    TextEntropy.utils.eachk(orders, function(order,i,k) {
-		    TextEntropy.dataVisualizations.renderSentence(TextEntropy.utils.smallerTestSentence, order, smallX, smallY, longLine, d3.select("#shannon" + order));
+		    TextEntropy.dataVisualizations.renderSentence(TextEntropy.utils.smallerTestSentence, order, smallX, smallY, longLine, d3.select("#armstrong" + order));
 		    setTimeout(k,0); // so that we show progress as each renders
 		}, function() {});
 	});
@@ -70,9 +70,7 @@ text.passage-word {
 </style>
 </head>
 <body>
-<h1>Text Entropy Visualization</h1>
-
-<h2>This is a visualization of the total information conveyed by an arbitrary message.</h2>
+<h1>Interactive Text Entropy Visualization</h1>
 
 <p>How much information do you get from a message? That depends on your model of what you're reading. If it's in English, you can even skip the last word in a sentence but still grasp the gist of __. If it's in a foreign language, you might get a lot more information about content, grammar, orthography, alphabet.</p>
 
@@ -83,9 +81,9 @@ text.passage-word {
 <p>Note how the 5-gram model predicts each word better, and thus makes a much more faded image, than a 4-gram model, and similarly the 4-gram model is more predictive than the 3-gram model.</p>
 
 <div id="armstrong-triptych">
-<svg id="shannon5" xmlns="http://www.w3.org/2000/svg"></svg>
-<svg id="shannon4" xmlns="http://www.w3.org/2000/svg"></svg>
-<svg id="shannon3" xmlns="http://www.w3.org/2000/svg"></svg>
+  <svg id="armstrong5" xmlns="http://www.w3.org/2000/svg"></svg>
+  <svg id="armstrong4" xmlns="http://www.w3.org/2000/svg"></svg>
+  <svg id="armstrong3" xmlns="http://www.w3.org/2000/svg"></svg>
 </div>
 
 <p>Try it out yourself!</p>
