@@ -12,10 +12,10 @@ window.onload = function() {
     var loadWords = word_id_mapping.loadWords;
     var longLine = 12;
     var shortLine = 6;
-    var smallX = 100;
-    var smallY = 100;
-    var largeX = 200;
-    var largeY = 200;
+    var smallX = 80;
+    var smallY = 80;
+    var largeX = 160;
+    var largeY = 160;
     var orders = [5,4,3];
 
     xhrFetchK(true, function(words) {
@@ -36,8 +36,9 @@ window.onload = function() {
 <style>
 body {
   font: 12pt Georgia;
+  width: 10in;
+  margin: auto;
 }
-h1 { font-family: Verdana; }
 .axis path, .axis line {
   fill: none;
   stroke: #000;
@@ -57,6 +58,7 @@ text.helptext {
 text.passage-word {
   text-anchor: end;
   font-size: 12pt;
+  text-shadow: 0px 0px 8px white;
 }
 #render #sentence {
   width: 100%;
@@ -68,7 +70,7 @@ text.passage-word {
 </style>
 </head>
 <body>
-<h1>Text entropy visualization</h1>
+<h1>Text Entropy Visualization</h1>
 
 <h2>This is a visualization of the total information conveyed by an arbitrary message.</h2>
 
