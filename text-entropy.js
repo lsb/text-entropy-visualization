@@ -23,11 +23,9 @@ TextEntropy.utils = (function() {
     return { testSentence: testSentence, smallerTestSentence: smallerTestSentence, tokenize: tokenize, eachk: eachk, convertProbabilityHashesToStackedAreaData: convertProbabilityHashesToStackedAreaData};
 })();
 
-
 TextEntropy.d3utils = {
     makeStackedAreaWithTooltip: function(d3Selection, data, activeOpacity, inactiveOpacity, width, height, keyToTooltipText, tooltip) { // kudos to bl.ocks.org/3020685
 	"use strict";
-
 	var x = d3.time.scale().range([0, width]);
 	var y = d3.scale.linear().range([height, 0]);
 	var colors = d3.scale.category10().range();
@@ -37,7 +35,6 @@ TextEntropy.d3utils = {
 	var stack = d3.layout.stack()
                       .offset("zero")
                       .x(function(d) { return d.date; }).y(function(d) { return d.value; });
-
 	var area = d3.svg.area()
                      .interpolate("basis")
                      .x(function(d) { return x(d.date); })
@@ -68,7 +65,6 @@ TextEntropy.d3utils = {
     }
 };
 
-
 TextEntropy.word_id_mapping = (function() {
     "use strict";
     var wordToId = {};
@@ -83,7 +79,6 @@ TextEntropy.word_id_mapping = (function() {
     return { loadWords: loadWords, byId: byId, byWord: byWord, xhrFetchK: xhrFetchK };
 })();
 
-
 TextEntropy.ngramDataIO = (function() {
     "use strict";
     var sentenceToProbabilityHashesK = function(string, order, callback) {
@@ -92,7 +87,6 @@ TextEntropy.ngramDataIO = (function() {
     };
     return {sentenceToProbabilityHashesK: sentenceToProbabilityHashesK};
 })();
-
 
 TextEntropy.d3Visualizations = {
     renderProbabilityHashesInWrapper: function(wrapper, probabilityHashes, width, height, wordsPerLine) {
@@ -117,7 +111,6 @@ TextEntropy.d3Visualizations = {
 	}, function(){});
     }
 };
-
 
 TextEntropy.dataVisualizations = {
     renderSentence: function(sentence, order, eachWidth, eachHeight, wordsPerLine, wrapper) {
