@@ -19,8 +19,11 @@ TextEntropy.utils = (function() {
 		return [{key: h.word, value: h.value, date: 0}, {key: h.word, value: h.value, date: 8}, {key: h.word, value: next, date: 9}, {key: h.word, value: next, date: 10}];
 	    });
     };
-
-    return { testSentence: testSentence, smallerTestSentence: smallerTestSentence, tokenize: tokenize, eachk: eachk, convertProbabilityHashesToStackedAreaData: convertProbabilityHashesToStackedAreaData};
+    var apiPath = "http://vivam.us/ngrams/"; // this is where I've hosted lsb/text-entropy-api
+    var smallWordListPath = apiPath + "idToWord-small.json";
+    var largeWordListPath = apiPath + "idToWord.json";
+    var statsPath = function(order, ids) { return apiPath + "stats?order=" + order + "&ids=" + ids.join(','); };
+    return { testSentence: testSentence, smallerTestSentence: smallerTestSentence, tokenize: tokenize, eachk: eachk, convertProbabilityHashesToStackedAreaData: convertProbabilityHashesToStackedAreaData, apiPath: apiPath, smallWordListPath: smallWordListPath, largeWordListPath: largeWordListPath, statsPath: statsPath};
 })();
 
 TextEntropy.d3utils = {
@@ -65,6 +68,7 @@ TextEntropy.d3utils = {
     }
 };
 
+// the API endpoint deals in word ids, not words.
 TextEntropy.word_id_mapping = (function() {
     "use strict";
     var wordToId = {};
@@ -73,23 +77,25 @@ TextEntropy.word_id_mapping = (function() {
         idToWord = words;
 	idToWord.forEach(function(word,id) { wordToId[word] = id });
     };
-    var xhrFetchK = function(isSmall, k) { d3.json("http://vivam.us/ngrams/" + (isSmall ? "idToWord-small.json" : "idToWord.json"), k) };
+    var xhrFetchK = function(isSmall, k) { d3.json((isSmall ? TextEntropy.utils.smallWordListPath : TextEntropy.utils.largeWordListPath), k); };
     var byId = function(id) { return idToWord[id] };
     var byWord = function(word) { return wordToId[word] };
     return { loadWords: loadWords, byId: byId, byWord: byWord, xhrFetchK: xhrFetchK };
 })();
 
+// it's impractical to move ~32GB of statistical models into the browser, so we make an external call
 TextEntropy.ngramDataIO = (function() {
     "use strict";
     var sentenceToProbabilityHashesK = function(string, order, callback) {
 	var wordIds = TextEntropy.utils.tokenize(string).map(function(word) { return TextEntropy.word_id_mapping.byWord(word) || 0 })
-	d3.json("http://vivam.us/ngrams/stats?order=" + order + "&ids=" + wordIds.join(','), callback);
+	d3.json(TextEntropy.utils.statsPath(order,wordIds), callback);
     };
     return {sentenceToProbabilityHashesK: sentenceToProbabilityHashesK};
 })();
 
 TextEntropy.d3Visualizations = {
     renderProbabilityHashesInWrapper: function(wrapper, probabilityHashes, width, height, wordsPerLine) {
+	"use strict";
 	if(console) console.log("total bits: ", d3.sum(d3.merge(probabilityHashes).filter(function(probabilityHash) { return probabilityHash.continues }), function(probabilityHash) { return probabilityHash.value == 0 ? Math.log(500000) : (Math.log(probabilityHash.value) / (0 - Math.log(2))) }));
 
 	var renderKey = function(id, prob) {
@@ -114,6 +120,7 @@ TextEntropy.d3Visualizations = {
 
 TextEntropy.dataVisualizations = {
     renderSentence: function(sentence, order, eachWidth, eachHeight, wordsPerLine, wrapper) {
+	"use strict";
 	if(!wrapper) { wrapper = d3.select("#wrapper"); }
 	wrapper.selectAll("*").remove();
 	TextEntropy.ngramDataIO.sentenceToProbabilityHashesK(sentence, order, function(probabilityHashes) {
