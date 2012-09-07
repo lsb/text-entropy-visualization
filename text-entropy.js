@@ -22,7 +22,7 @@ TextEntropy.utils = (function() {
     var apiPath = "http://vivam.us/ngrams/"; // this is where I've hosted lsb/text-entropy-api
     var smallWordListPath = apiPath + "idToWord-small.json";
     var largeWordListPath = apiPath + "idToWord.json";
-    var statsPath = function(order, ids) { return apiPath + "stats?order=" + order + "&ids=" + ids.join(','); };
+    var statsPath = function(order, ids, isSmall) { return apiPath + "stats?" + (isSmall ? "oneword=true&" : "") + "order=" + order + "&ids=" + ids.join(','); };
     return { testSentence: testSentence, smallerTestSentence: smallerTestSentence, tokenize: tokenize, eachk: eachk, convertProbabilityHashesToStackedAreaData: convertProbabilityHashesToStackedAreaData, apiPath: apiPath, smallWordListPath: smallWordListPath, largeWordListPath: largeWordListPath, statsPath: statsPath};
 })();
 
@@ -86,11 +86,13 @@ TextEntropy.word_id_mapping = (function() {
 // it's impractical to move ~32GB of statistical models into the browser, so we make an external call
 TextEntropy.ngramDataIO = (function() {
     "use strict";
-    var sentenceToProbabilityHashesK = function(string, order, callback) {
+    var sentenceToProbabilityHashesK = function(string, order, isSmall, callback) {
 	var wordIds = TextEntropy.utils.tokenize(string).map(function(word) { return TextEntropy.word_id_mapping.byWord(word) || 0 })
-	d3.json(TextEntropy.utils.statsPath(order,wordIds), callback);
+	d3.json(TextEntropy.utils.statsPath(order,wordIds,isSmall), callback);
     };
-    return {sentenceToProbabilityHashesK: sentenceToProbabilityHashesK};
+    var sentenceToFullProbabilityHashesK = function(string, order, callback) { sentenceToProbabilityHashesK(string, order, false, callback) };
+    var sentenceToSmallProbabilityHashesK = function(string, order, callback) { sentenceToProbabilityHashesK(string, order, true, callback) };
+    return {sentenceToFullProbabilityHashesK: sentenceToFullProbabilityHashesK, sentenceToSmallProbabilityHashesK: sentenceToSmallProbabilityHashesK};
 })();
 
 TextEntropy.d3Visualizations = {
@@ -123,7 +125,7 @@ TextEntropy.dataVisualizations = {
 	"use strict";
 	if(!wrapper) { wrapper = d3.select("#wrapper"); }
 	wrapper.selectAll("*").remove();
-	TextEntropy.ngramDataIO.sentenceToProbabilityHashesK(sentence, order, function(probabilityHashes) {
+	TextEntropy.ngramDataIO.sentenceToFullProbabilityHashesK(sentence, order, function(probabilityHashes) {
 		TextEntropy.d3Visualizations.renderProbabilityHashesInWrapper(wrapper, probabilityHashes, eachWidth, eachHeight, wordsPerLine);
 	    });
     }
